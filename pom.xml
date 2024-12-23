@@ -1,8 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>com.example</groupId>
   <artifactId>DemoProject</artifactId>
   <packaging>jar</packaging>
@@ -10,7 +9,7 @@
   <name>DemoProject</name>
   <url>http://maven.apache.org</url>
 
-  <!-- Properties section for version management and SonarQube configuration -->
+  <!-- JaCoCo and SonarQube configuration -->
   <properties>
     <!-- JaCoCo version -->
     <jacoco.version>0.8.6</jacoco.version>
@@ -18,11 +17,10 @@
     <!-- SonarQube configuration -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+    <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.language>java</sonar.language>
   </properties>
 
-  <!-- Dependencies section -->
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -30,12 +28,17 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>0.8.6</version>
+    </dependency>
   </dependencies>
 
-  <!-- Build section with plugins for JaCoCo and SonarQube -->
+  <!-- Build section for plugins -->
   <build>
     <plugins>
-      <!-- JaCoCo Plugin for Code Coverage -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -59,14 +62,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- SonarQube Maven Plugin -->
-      <plugin>
-        <groupId>org.sonarsource.scanner.maven</groupId>
-        <artifactId>sonar-maven-plugin</artifactId>
-        <version>3.9.0.2184</version> <!-- Or use the latest version -->
-      </plugin>
     </plugins>
   </build>
-
 </project>
