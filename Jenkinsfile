@@ -2,8 +2,8 @@ pipeline {
     agent any 
     
     tools{
-        jdk 'jdk11'
-        maven 'maven3'
+        jdk 'jdk'
+        maven 'maven'
     }
     
     environment {
@@ -14,7 +14,7 @@ pipeline {
         
         stage("Git Checkout"){
             steps{
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/jaiswaladi246/Petclinic.git'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/anantha3267/Interview-Project.git'
             }
         }
         
