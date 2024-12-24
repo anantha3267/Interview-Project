@@ -56,48 +56,30 @@ pipeline {
                 }
             }
         }
-
-        // OWASP Dependency-Check
-        stage('OWASP') {
+                stage('OWASP') {
             steps {
-                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Dependency check'
-            }
+                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Dependency check',
+                 stopBuild: true // Stop on any critical vulnerabilities
+                 
+            }     
         }
-
-        // JaCoCo Code Coverage
+        // JaCoCo Code Coverage Report
         stage('JaCoCo Report') {
             steps {
+                // Run JaCoCo and generate the report
                 sh "mvn clean test jacoco:report"
             }
         }
     }
-
     post {
-        success {
-            mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Success', body: 'The build has completed successfully.'
-        }
-
-        failure {
-            // Email Notification on failure (optional)
-            mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Failed', body: 'The build has failed. Please check the Jenkins logs.'
-        }
-
         always {
-            // Publish JaCoCo report in Jenkins
+            // Publish JaCoCo code coverage in Jenkins
             jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
 
+            // Optionally, you can publish the JaCoCo HTML report in Jenkins
             publishHTML(target: [
                 reportName: 'JaCoCo Report',
                 reportDir: 'target/site/jacoco',
-                reportFiles: 'index.html'
-            ])
-        }
-
-        always {
-            // Publish SonarQube report in Jenkins
-            publishHTML(target: [
-                reportName: 'SonarQube Report',
-                reportDir: 'target/sonar',
                 reportFiles: 'index.html'
             ])
         }
