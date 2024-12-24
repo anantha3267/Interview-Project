@@ -82,11 +82,13 @@ pipeline {
             jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
         }
 
-        // Publish Dependency-Check Reports if exists
-        publishHTML(target: [
-            reportName: 'Dependency Check Report',
-            reportDir: 'dependency-check-report',
-            reportFiles: 'dependency-check-report.html'
-        ])
+        always {
+            // Publish SonarQube report in Jenkins
+            publishHTML(target: [
+                reportName: 'SonarQube Report',
+                reportDir: 'target/sonar',
+                reportFiles: 'index.html'
+            ])
+        }
     }
 }
