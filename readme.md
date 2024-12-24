@@ -65,4 +65,4 @@ terraform init
 terraform apply -auto-approve
 ```
 
-Refer Sonar.docx for more snapshots
+Refer **Sonar.docx** for more snapshots
