@@ -30,23 +30,29 @@ pipeline {
         // SonarQube Analysis
         stage('Sonar analysis') {
             steps {
-                sh "mvn clean package"
-                sh ''' mvn sonar:sonar \
-                        -Dsonar.url=http://3.87.111.231:9000/ \
-                        -Dsonar.login=squ_243a8ea9381287139804a2590d5625bc6ff4f5ec \
-                        -Dsonar.projectName=Scoreme \
-                        -Dsonar.java.binaries=. \
-                        -Dsonar.projectKey=Scoreme
-                        -Dsonar.reportPath=target/sonar '''
+                script {
+                    // Use the SonarQube environment
+                    withSonarQubeEnv('SonarQube') {
+                        sh "mvn clean package"
+                        sh ''' mvn sonar:sonar \
+                                -Dsonar.projectName=Scoreme \
+                                -Dsonar.java.binaries=. \
+                                -Dsonar.projectKey=Scoreme '''
+                    }
+                }
             }
         }
 
-        // Wait for SonarQube Quality Gate
+        //Wait for SonarQube Quality Gate
         stage('Quality Gate') {
-            timeout(time: 1, unit: 'HOURS') {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
                 }
             }
         }
