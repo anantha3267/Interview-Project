@@ -85,6 +85,12 @@ pipeline {
         always {
             // Publish JaCoCo report in Jenkins
             jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
+
+            publishHTML(target: [
+                reportName: 'JaCoCo Report',
+                reportDir: 'target/site/jacoco',
+                reportFiles: 'index.html'
+            ])
         }
 
         always {
