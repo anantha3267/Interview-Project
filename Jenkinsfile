@@ -36,7 +36,8 @@ pipeline {
                         -Dsonar.login=squ_243a8ea9381287139804a2590d5625bc6ff4f5ec \
                         -Dsonar.projectName=Scoreme \
                         -Dsonar.java.binaries=. \
-                        -Dsonar.projectKey=Scoreme '''
+                        -Dsonar.projectKey=Scoreme
+                        -Dsonar.reportPath=target/sonar '''
             }
         }
 
@@ -79,15 +80,6 @@ pipeline {
         always {
             // Publish JaCoCo report in Jenkins
             jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
-        }
-
-        always {
-            // Publish SonarQube report in Jenkins
-            publishHTML(target: [
-                reportName: 'SonarQube Report',
-                reportDir: 'target/sonar',
-                reportFiles: 'index.html'
-            ])
         }
 
         // Publish Dependency-Check Reports if exists
