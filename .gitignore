@@ -24,3 +24,4 @@ override.tf.json
 # Core directory for Terraform
 .terraform/
 .terraform.lock.hcl
+Steps.txt
