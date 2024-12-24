@@ -64,3 +64,5 @@ To provision Jenkins and SonarQube in a dedicated VPC, run the following Terrafo
 terraform init
 terraform apply -auto-approve
 ```
+
+Refer Sonar.docx for more snapshots
