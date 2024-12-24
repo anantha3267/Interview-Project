@@ -1,82 +1,92 @@
 pipeline {
-    agent any 
-    
-    tools{
-        jdk 'jdk11'
-        maven 'maven3'
+    agent any
+    tools {
+        jdk 'jdk'
+        maven 'maven'
     }
-    
-    environment {
-        SCANNER_HOME=tool 'sonar-scanner'
-    }
-    
-    stages{
-        
-        stage("Git Checkout"){
-            steps{
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/jaiswaladi246/Petclinic.git'
+
+    stages {
+        // Git Checkout
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', changelog: false, poll: true, url: 'https://github.com/anantha3267/Interview-Project.git'
             }
         }
-        
-        stage("Compile"){
-            steps{
+
+        // Compile Stage
+        stage('Compile') {
+            steps {
                 sh "mvn clean compile"
             }
         }
-        
-         stage("Test Cases"){
-            steps{
+
+        // Run Test Cases
+        stage('Test Cases') {
+            steps {
                 sh "mvn test"
             }
         }
-        
-        stage("Sonarqube Analysis "){
-            steps{
-                withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Petclinic \
-                    -Dsonar.java.binaries=. \
-                    -Dsonar.projectKey=Petclinic '''
-    
+
+        // SonarQube Analysis
+        stage('Sonar analysis') {
+            steps {
+                sh "mvn clean package"
+                sh ''' mvn sonar:sonar \
+                        -Dsonar.url=http://3.87.111.231:9000/ \
+                        -Dsonar.login=squ_243a8ea9381287139804a2590d5625bc6ff4f5ec \
+                        -Dsonar.projectName=Scoreme \
+                        -Dsonar.java.binaries=. \
+                        -Dsonar.projectKey=Scoreme '''
+            }
+        }
+
+        // Wait for SonarQube Quality Gate
+        stage('Quality Gate') {
+            timeout(time: 1, unit: 'HOURS') {
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
                 }
             }
         }
-        
-        stage("OWASP Dependency Check"){
-            steps{
-                dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+
+        // OWASP Dependency-Check
+        stage('OWASP') {
+            steps {
+                dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Dependency check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        
-         stage("Build"){
-            steps{
-                sh " mvn clean install"
+
+        // JaCoCo Code Coverage
+        stage('JaCoCo Report') {
+            steps {
+                sh "mvn clean test jacoco:report"
             }
         }
-        
-        stage("Docker Build & Push"){
-            steps{
-                script{
-                   withDockerRegistry(credentialsId: '58be877c-9294-410e-98ee-6a959d73b352', toolName: 'docker') {
-                        
-                        sh "docker build -t image1 ."
-                        sh "docker tag image1 adijaiswal/pet-clinic123:latest "
-                        sh "docker push adijaiswal/pet-clinic123:latest "
-                    }
-                }
-            }
+    }
+
+    post {
+        always {
+            // Publish JaCoCo report in Jenkins
+            jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
         }
-        
-        stage("TRIVY"){
-            steps{
-                sh " trivy image adijaiswal/pet-clinic123:latest"
-            }
+
+        success {
+            
+            mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Success', body: 'The build has completed successfully.'
         }
-        
-        stage("Deploy To Tomcat"){
-            steps{
-                sh "cp  /var/lib/jenkins/workspace/CI-CD/target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/ "
-            }
+
+        failure {
+            // Email Notification on failure (optional)
+            mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Failed', body: 'The build has failed. Please check the Jenkins logs.'
         }
+
+        // Publish Dependency-Check Reports if exists
+        publishHTML(target: [
+            reportName: 'Dependency Check Report',
+            reportDir: 'dependency-check-report',
+            reportFiles: 'dependency-check-report.html'
+        ])
     }
 }
