@@ -67,12 +67,8 @@ pipeline {
     }
 
     post {
-        always {
-            // Publish JaCoCo report in Jenkins
-            jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
-        }
 
-        success {
+                success {
             
             mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Success', body: 'The build has completed successfully.'
         }
@@ -81,6 +77,21 @@ pipeline {
             // Email Notification on failure (optional)
             mail to: 'ananthamchiranjeevi@gmail.com', subject: 'Build Failed', body: 'The build has failed. Please check the Jenkins logs.'
         }
+        always {
+            // Publish JaCoCo report in Jenkins
+            jacoco execPattern: '**/target/*.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java'
+        }
+
+                always {
+            // Publish SonarQube report in Jenkins
+            publishHTML(target: [
+                reportName: 'SonarQube Report',
+                reportDir: 'target/sonar',
+                reportFiles: 'index.html'
+            ])
+        }
+
+
 
         // Publish Dependency-Check Reports if exists
         publishHTML(target: [
